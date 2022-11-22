@@ -1,8 +1,3 @@
-"""
-P. Lehnen - Masters Thesis - Neural networks for topology estimation of power grids - 30.3.2022
-Experiment 7: Search Tree Functions. Nodes are building blocks of the search tree
-v0.0.1
-"""
 import math
 from typing import Dict, List
 
