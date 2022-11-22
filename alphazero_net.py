@@ -1,8 +1,3 @@
-"""
-P. Lehnen - Masters Thesis - Neural networks for topology estimation of power grids - 30.3.2022
-Experiment 7: AlphaZero Network
-v0.0.1
-"""
 import numpy as np
 import tensorflow as tf
 import tensorflow.keras.layers as kl
