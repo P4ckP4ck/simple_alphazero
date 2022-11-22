@@ -1,8 +1,3 @@
-"""
-P. Lehnen - Masters Thesis - Neural networks for topology estimation of power grids - 30.3.2022
-Experiment 7: Configuration file for MCTS algorithms
-v0.0.1
-"""
 import numpy as np
 
 THREAD_NAME = "pid_0001"
