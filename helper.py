@@ -1,8 +1,3 @@
-"""
-P. Lehnen - Masters Thesis - Neural networks for topology estimation of power grids - 30.3.2022
-Experiment 7: Helper Functions for MCTS algorithms
-v0.0.1
-"""
 import os
 import random
 import time
