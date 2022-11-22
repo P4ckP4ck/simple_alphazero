@@ -1,8 +1,3 @@
-"""
-P. Lehnen - Masters Thesis - Neural networks for topology estimation of power grids - 30.3.2022
-Experiment 7: Supervised Monte Carlo Tree Search algortihm
-v0.0.1
-"""
 import numpy as np
 import pandas as pd
 import tensorflow as tf
