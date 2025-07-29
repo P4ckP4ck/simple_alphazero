@@ -197,17 +197,20 @@ class PrioritizedExperienceReplay:
         self._errors_prob = td_errors / sum(td_errors)
 
     def write_to_disc(self) -> None:
-        """
-        Saving buffer to file
-        """
-        np.save(f"buffer/buffer_{cfg.THREAD_NAME}.npy", self._buffer)
+        os.makedirs("buffer", exist_ok=True)  # make sure folder exists
+        np.save(
+            f"buffer/buffer_{cfg.THREAD_NAME}.npy",
+            np.array(self._buffer, dtype=object),  # 👈 key change
+            allow_pickle=True
+        )
 
     def partial_write_to_disc(self) -> None:
-        """
-        If buffer is not running on the main thread, this will save the current state
-        and refresh the buffer to save memory
-        """
-        np.save(f"buffer/xtemp_buffer_{int(time.time()*10000)}.npy", self._buffer)
+        os.makedirs("buffer", exist_ok=True)
+        np.save(
+            f"buffer/xtemp_buffer_{int(time.time() * 10000)}.npy",
+            np.array(self._buffer, dtype=object),
+            allow_pickle=True
+        )
         self._buffer = []
 
     def reload_buffer(self) -> None:

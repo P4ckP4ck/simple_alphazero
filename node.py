@@ -114,7 +114,7 @@ class Node:
         self._value_sum += value
         for p, a in zip(priors, cfg.action_range):
             copy_env = deepcopy(self._environment)
-            next_state, reward, done, info = copy_env.step(a)
+            next_state, reward, done, info, _ = copy_env.step(a)
             self._children[a] = Node(network=self._network,
                                      environment=copy_env,
                                      state=next_state,
@@ -134,7 +134,7 @@ class Node:
         """
         ucb = []
         for a in cfg.action_range:
-            ucb.append(self._children[a].ucb_score)
+            ucb.append(float(self._children[a].ucb_score))
         return int(np.argmax(ucb))
 
     def explore(self) -> None:

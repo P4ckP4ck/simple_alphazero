@@ -100,7 +100,7 @@ class Network:
         """
         Handler for saving the network
         """
-        self._alpha_net.save_weights("save/alpha_net.h5")
+        self._alpha_net.save_weights("save/alpha_net.weights.h5")
 
     def _load_weights(self):
         """

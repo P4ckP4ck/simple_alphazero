@@ -1,14 +1,14 @@
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-from tqdm import tqdm
+from tqdm import tqdm, trange
 import matplotlib.pyplot as plt
 
 import config as cfg
 import helper as hlp
 from alphazero_net import Network
 from node import Node
-import gym
+import gymnasium as gym
 
 import matplotlib
 matplotlib.use("TkAgg")
@@ -22,42 +22,38 @@ for gpu in gpus:
 
 def run_episode(network: Network,
                 scaler: hlp.Scaler,
-                environment,
+                env,
                 replay_buffer) -> float:
-    """
-    Main simulation loop for the algorithm
-    :param network: Neural network to perform predictions with
-    :param scaler: Scaler object
-    :param environment: Environment object
-    :return: Accumulated reward
-    """
-    # Initializing simulation
 
     scaler.refresh()
-    state: np.array = environment.reset()
-    total_reward: float = 0.
+    state, _ = env.reset()          # Gymnasium reset returns (obs, info)
+    total_reward = 0.0
 
-    # Main simulation loop
     for step in range(cfg.max_moves):
-        root = Node(network, environment, scaler, state)
+        root = Node(network, env, scaler, state)
 
-        # Perform Monte Carlo Tree Search
         for _ in range(cfg.num_simulations):
             root.explore()
 
-        # Act according to Tree Search finding and store results
         action = root.get_action()
-        next_state, reward, done, info = environment.step(action)
-        # environment.render()
-        if not step == 0:
-            val = old_reward + root.value * cfg.discount if not done else reward
+
+        next_state, reward, terminated, truncated, info = env.step(action)
+        done = terminated or truncated
+
+        if step != 0:
+            val = old_reward + (1.0 - done) * cfg.discount * root.value
             replay_buffer.append(state=old_state,
                                  priors=old_priors,
                                  value=val)
+
         old_state, old_priors, old_reward = next_state, root.get_priors(), reward
         total_reward += reward
         if done:
+            print(step)
             break
+
+        state = next_state
+
     return total_reward
 
 
@@ -69,9 +65,29 @@ def get_target(node):
         node = node._children[np.argmax(visits)]
     return node.value
 
+def warmup_replay_buffer():
+    import os
+    environment = gym.make("CartPole-v1")
+    scaler = hlp.Scaler()
+    network = Network()
+    replay_buffer = hlp.PrioritizedExperienceReplay(network)
+    os.makedirs("buffer", exist_ok=True)
+
+    # --- 1)  warm‑up  ------------------------------------------------
+    WARMUP_EPISODES = 1
+    print("Warmup started...")
+    for _ in trange(WARMUP_EPISODES):
+        run_episode(network, scaler, environment, replay_buffer)
+
+    print(f"Replay buffer now contains {replay_buffer.size} samples.")
+    replay_buffer.write_to_disc()
+
 if __name__ == "__main__":
     # Initializing helper objects
     plt.ioff()
+    warmup = True
+    if warmup:
+        warmup_replay_buffer()
     environment = gym.make('CartPole-v1')#, render_mode="rgb_array")
     scaler = hlp.Scaler()
     network = Network()
