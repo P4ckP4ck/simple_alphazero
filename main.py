@@ -9,6 +9,7 @@ import helper as hlp
 from alphazero_net import Network
 from node import Node
 import gymnasium as gym
+from energy_env import SimpleEnergyEnv
 
 import matplotlib
 matplotlib.use("TkAgg")
@@ -26,7 +27,7 @@ def run_episode(network: Network,
                 replay_buffer) -> float:
 
     scaler.refresh()
-    state, _ = env.reset()          # Gymnasium reset returns (obs, info)
+    state = env.reset()          # Gymnasium reset returns (obs, info)
     total_reward = 0.0
 
     for step in range(cfg.max_moves):
@@ -37,8 +38,8 @@ def run_episode(network: Network,
 
         action = root.get_action()
 
-        next_state, reward, terminated, truncated, info = env.step(action)
-        done = terminated or truncated
+        next_state, reward, done, info = env.step(action)
+
 
         if step != 0:
             val = old_reward + (1.0 - done) * cfg.discount * root.value
@@ -65,9 +66,8 @@ def get_target(node):
         node = node._children[np.argmax(visits)]
     return node.value
 
-def warmup_replay_buffer():
+def warmup_replay_buffer(environment):
     import os
-    environment = gym.make("CartPole-v1")
     scaler = hlp.Scaler()
     network = Network()
     replay_buffer = hlp.PrioritizedExperienceReplay(network)
@@ -85,10 +85,10 @@ def warmup_replay_buffer():
 if __name__ == "__main__":
     # Initializing helper objects
     plt.ioff()
+    environment = SimpleEnergyEnv()
     warmup = True
     if warmup:
-        warmup_replay_buffer()
-    environment = gym.make('CartPole-v1')#, render_mode="rgb_array")
+        warmup_replay_buffer(env)
     scaler = hlp.Scaler()
     network = Network()
     replay_buffer = hlp.PrioritizedExperienceReplay(network)
